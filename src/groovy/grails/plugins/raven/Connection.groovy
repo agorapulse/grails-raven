@@ -35,17 +35,35 @@ public class Connection {
     public void send(String messageBody, long timestamp) throws IOException {
         String hmacSignature = getSignature("$timestamp $messageBody", config.secretKey)
 
-        HttpURLConnection connection = getConnection()
-        connection.setRequestMethod("POST")
-        connection.setDoOutput(true)
-        connection.setReadTimeout(10000)
-        connection.setRequestProperty("X-Sentry-Auth", buildAuthHeader(hmacSignature, timestamp, config.publicKey))
-        OutputStream output = connection.getOutputStream()
-        output.write(messageBody.getBytes())
-        output.close()
-        connection.connect()
-        InputStream input = connection.getInputStream()
-        input.close()
+        Executors.newCachedThreadPool().execute(new Runnable() {
+            @Override
+            void run() {
+                HttpURLConnection connection = null
+                try {
+                    connection = getConnection()
+                    connection.setRequestMethod("POST")
+                    connection.setDoOutput(true)
+                    connection.setReadTimeout(5000)
+                    connection.setConnectTimeout(5000)
+                    connection.setRequestProperty("X-Sentry-Auth", buildAuthHeader(hmacSignature, timestamp, config.publicKey))
+                    OutputStream output = connection.getOutputStream()
+                    output.write(messageBody.getBytes())
+                    output.close()
+                    connection.connect()
+                    InputStream input = connection.getInputStream()
+                    input.close()
+                } catch ( IOException e ) {
+                    if (connection != null) {
+                        try {
+                            connection.disconnect()
+                        } catch ( Exception e2 ) {
+                            //ignore bad disconnect
+                        }
+                    }
+                    throw e
+                }
+            }
+        })
     }
 
     private String buildAuthHeader(String hmacSignature, long timestamp, String publicKey) {
