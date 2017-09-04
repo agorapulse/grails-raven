@@ -2,7 +2,7 @@ package grails.plugin.sentry
 
 import ch.qos.logback.classic.Logger
 import com.stehno.ersatz.ErsatzServer
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import io.sentry.Sentry
 import io.sentry.SentryClient
 import io.sentry.SentryClientFactory
