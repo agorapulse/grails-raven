@@ -38,6 +38,12 @@ class SentryConfig {
     static List<Level> defaultLevels = [Level.ERROR, Level.WARN]
 
     SentryConfig(Map config = [:]) {
+        if (!config) {
+            active = false
+
+            return
+        }
+
         if (config.dsn) {
             dsn = config.dsn?.toString()
             active = true
@@ -85,11 +91,11 @@ class SentryConfig {
             springSecurityUser = true
         }
 
-        if (config.springSecurityUserProperties instanceof Map) {
+        if (config.springSecurityUserProperties && config.springSecurityUserProperties instanceof Map) {
             springSecurityUserProperties = new SpringSecurityUserProperties(
-                    id: (config.springSecurityUserProperties as Map).id?.toString() ?: null,
-                    email: (config.springSecurityUserProperties as Map).email?.toString() ?: null,
-                    username: (config.springSecurityUserProperties as Map).username?.toString() ?: null,
+                    id: (config.springSecurityUserProperties as Map).id as String ?: null,
+                    email: (config.springSecurityUserProperties as Map).email as String ?: null,
+                    username: (config.springSecurityUserProperties as Map).username as String ?: null,
                     data: (config.springSecurityUserProperties as Map).data as List ?: null
             )
         }
