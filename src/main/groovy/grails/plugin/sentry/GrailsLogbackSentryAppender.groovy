@@ -72,7 +72,7 @@ class GrailsLogbackSentryAppender extends SentryAppender {
         }
 
         // remove trash from message
-        if (iLoggingEvent.getFormattedMessage().trim().equals('Full Stack Trace:')) {
+        if (iLoggingEvent.getFormattedMessage().trim() == 'Full Stack Trace:') {
             eventBuilder.withMessage(iLoggingEvent.getFormattedMessage().trim().replace('Full Stack Trace:', ''))
         }
 
@@ -153,4 +153,5 @@ class GrailsLogbackSentryAppender extends SentryAppender {
         }
         super.addStatus(status)
     }
+
 }

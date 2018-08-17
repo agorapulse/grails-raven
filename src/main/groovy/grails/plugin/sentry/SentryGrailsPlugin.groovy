@@ -21,7 +21,7 @@ import ch.qos.logback.classic.helpers.MDCInsertingServletFilter
 import grails.plugins.Plugin
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
-import groovy.util.logging.Commons
+import groovy.util.logging.Slf4j
 import io.sentry.DefaultSentryClientFactory
 import io.sentry.Sentry
 import io.sentry.SentryClient
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 
 @CompileStatic
-@Commons
+@Slf4j
 class SentryGrailsPlugin extends Plugin {
 
     // the version or versions of Grails the plugin is designed for
@@ -72,7 +72,7 @@ class SentryGrailsPlugin extends Plugin {
                 }
 
                 if (pluginConfig.springSecurityUser) {
-                    springSecurityUserEventBuilderHelper(SpringSecurityUserEventBuilderHelper) {
+                    springSecurityUserEventBuilderHelper(SpringSecurityUserEventBuilderHelper, pluginConfig) {
                         springSecurityService = ref('springSecurityService')
                         if (pluginConfig.logHttpRequest)
                             sentryServletRequestListener = ref('sentryServletRequestListener')

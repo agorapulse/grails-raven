@@ -15,7 +15,6 @@
  */
 package grails.plugin.sentry
 
-import grails.util.Holders
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import io.sentry.event.EventBuilder
@@ -31,12 +30,18 @@ import javax.servlet.http.HttpServletRequest
 @CompileStatic
 class SpringSecurityUserEventBuilderHelper implements EventBuilderHelper {
 
-    static List<String> ipHeaders = ['X-Real-IP',
-                                     'Client-IP',
-                                     'X-Forwarded-For',
-                                     'Proxy-Client-IP',
-                                     'WL-Proxy-Client-IP',
-                                     'rlnclientipaddr']
+    private static final List<String> IP_HEADERS = ['X-Real-IP',
+                                                    'Client-IP',
+                                                    'X-Forwarded-For',
+                                                    'Proxy-Client-IP',
+                                                    'WL-Proxy-Client-IP',
+                                                    'rlnclientipaddr']
+
+    SentryConfig config
+
+    SpringSecurityUserEventBuilderHelper(SentryConfig config) {
+        this.config = config
+    }
 
     def springSecurityService
     SentryServletRequestListener sentryServletRequestListener
@@ -50,30 +55,23 @@ class SpringSecurityUserEventBuilderHelper implements EventBuilderHelper {
             def principal = springSecurityService.getPrincipal()
 
             if (principal != null && principal != 'anonymousUser') {
-                def sentryConfig = Holders.config.grails?.plugin?.sentry
-
                 String idPropertyName = 'id'
                 String emailPropertyName = null
                 String usernamePropertyName = 'username'
                 List data = null
 
-                if (sentryConfig?.springSecurityUserProperties &&
-                        sentryConfig?.springSecurityUserProperties instanceof Map) {
-                    if (sentryConfig.springSecurityUserProperties.id &&
-                            sentryConfig.springSecurityUserProperties.id instanceof String) {
-                        idPropertyName = sentryConfig.springSecurityUserProperties.id
+                if (config?.springSecurityUserProperties) {
+                    if (config.springSecurityUserProperties.id) {
+                        idPropertyName = config.springSecurityUserProperties.id
                     }
-                    if (sentryConfig.springSecurityUserProperties.email &&
-                            sentryConfig.springSecurityUserProperties.email instanceof String) {
-                        emailPropertyName = sentryConfig.springSecurityUserProperties.email
+                    if (config.springSecurityUserProperties.email) {
+                        emailPropertyName = config.springSecurityUserProperties.email
                     }
-                    if (sentryConfig.springSecurityUserProperties.username &&
-                            sentryConfig.springSecurityUserProperties.username instanceof String) {
-                        usernamePropertyName = sentryConfig.springSecurityUserProperties.username
+                    if (config.springSecurityUserProperties.username) {
+                        usernamePropertyName = config.springSecurityUserProperties.username
                     }
-                    if (sentryConfig.springSecurityUserProperties.data &&
-                            sentryConfig.springSecurityUserProperties.data instanceof List) {
-                        data = sentryConfig.springSecurityUserProperties.data
+                    if (config.springSecurityUserProperties.data) {
+                        data = config.springSecurityUserProperties.data
                     }
                 }
 
@@ -82,21 +80,23 @@ class SpringSecurityUserEventBuilderHelper implements EventBuilderHelper {
                 String ipAddress = getIpAddress(sentryServletRequestListener?.getServletRequest())
                 String email = emailPropertyName ? principal[emailPropertyName].toString() : null
                 Map<String, Object> extraData = [:]
-                data.each { String key ->
-                    extraData[key] = principal[key].toString()
+                data.each { Object key ->
+                    extraData[key as String] = principal[key as String].toString()
                 }
+
                 UserInterface userInterface = new UserInterface(id, username, ipAddress, email, extraData)
+
                 eventBuilder.withSentryInterface(userInterface, true)
             }
         }
     }
 
-    String getIpAddress(HttpServletRequest request) {
+    private static String getIpAddress(HttpServletRequest request) {
         String unknown = '127.0.0.1'
         String ipAddress = unknown
 
         if (request) {
-            ipHeaders.each { header ->
+            IP_HEADERS.each { header ->
                 if (!ipAddress || unknown.equalsIgnoreCase(ipAddress))
                     ipAddress = request.getHeader(header)
             }

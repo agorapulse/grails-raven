@@ -1,0 +1,12 @@
+grails:
+    plugin:
+        sentry:
+            dsn: ${SENTRY_DSN:}
+            active: ${SENTRY_ACTIVE:true}
+            serverName: ${SENTRY_SERVER_NAME:}
+            logClassName: ${SENTRY_LOG_CLASS_NAME:true}
+            logHttpRequest: ${SENTRY_LOG_HTTP_REQUEST:true}
+            disableMDCInsertingServletFilter: ${SENTRY_DISABLE_MDC:false}
+            springSecurityUser: ${SENTRY_SPRING_SECURITY_ENABLED:false}
+            springSecurityUserProperties:
+                email: username
