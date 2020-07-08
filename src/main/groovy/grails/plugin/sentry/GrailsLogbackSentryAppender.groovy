@@ -16,6 +16,7 @@
 package grails.plugin.sentry
 
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.classic.spi.IThrowableProxy
 import ch.qos.logback.core.status.ErrorStatus
 import ch.qos.logback.core.status.Status
 import grails.util.Environment
@@ -28,6 +29,7 @@ import io.sentry.event.interfaces.ExceptionInterface
 import io.sentry.event.interfaces.MessageInterface
 import io.sentry.event.interfaces.StackTraceInterface
 import io.sentry.logback.SentryAppender
+import org.codehaus.groovy.runtime.StackTraceUtils
 
 @CompileStatic
 class GrailsLogbackSentryAppender extends SentryAppender {
@@ -152,6 +154,18 @@ class GrailsLogbackSentryAppender extends SentryAppender {
             status.throwable?.printStackTrace()
         }
         super.addStatus(status)
+    }
+
+    @Override
+    protected StackTraceElement[] toStackTraceElements(IThrowableProxy throwableProxy) {
+        StackTraceElement[] stackTraceElements = super.toStackTraceElements(throwableProxy)
+        if (!config.sanitizeStackTrace) {
+            return stackTraceElements
+        }
+
+        Exception stackTraceWrapper = new Exception()
+        stackTraceWrapper.stackTrace = stackTraceElements
+        StackTraceUtils.deepSanitize(stackTraceWrapper).stackTrace
     }
 
 }

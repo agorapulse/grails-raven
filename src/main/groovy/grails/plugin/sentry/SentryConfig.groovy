@@ -22,6 +22,7 @@ import groovy.transform.CompileStatic
         logHttpRequest: true
         disableMDCInsertingServletFilter: true
         springSecurityUser: true
+        sanitizeStackTrace: true
         springSecurityUserProperties:
             id: 'id'
             email: 'emailAddress'
@@ -90,6 +91,9 @@ class SentryConfig {
         if (config.springSecurityUser as String == 'true') {
             springSecurityUser = true
         }
+        if (config.sanitizeStackTrace as String == 'true') {
+            sanitizeStackTrace = true
+        }
 
         if (config.springSecurityUserProperties && config.springSecurityUserProperties instanceof Map) {
             springSecurityUserProperties = new SpringSecurityUserProperties(
@@ -112,6 +116,7 @@ class SentryConfig {
     boolean logHttpRequest = false
     boolean disableMDCInsertingServletFilter = false
     boolean springSecurityUser = false
+    boolean sanitizeStackTrace = false
     // TODO
     // priorities
     // subsystems
