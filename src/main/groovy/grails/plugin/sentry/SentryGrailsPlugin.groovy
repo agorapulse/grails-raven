@@ -24,6 +24,7 @@ import groovy.transform.TypeCheckingMode
 import groovy.util.logging.Slf4j
 import io.sentry.Sentry
 import io.sentry.SentryClient
+import io.sentry.dsn.Dsn
 import io.sentry.servlet.SentryServletRequestListener
 import org.slf4j.LoggerFactory
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -59,8 +60,10 @@ class SentryGrailsPlugin extends Plugin {
 
             if (pluginConfig?.dsn) {
                 log.info 'Sentry config found, creating Sentry client and corresponding Logback appender'
-                grailsSentryClientFactory(GrailsSentryClientFactory)
-                sentryClient(grailsSentryClientFactory: 'createSentryClient', pluginConfig.dsn.toString()) { bean ->
+                sentryClientFactoryProvider(SentryClientFactoryProvider)
+                Dsn realDsn = new Dsn(pluginConfig.dsn.toString())
+                sentryClientFactory(sentryClientFactoryProvider: 'createFactory', realDsn)
+                sentryClient(sentryClientFactory: 'createSentryClient', realDsn) { bean ->
                     bean.autowire = 'byName'
                 }
                 sentryAppender(GrailsLogbackSentryAppender, pluginConfig, grailsApplication.metadata['info.app.version'])

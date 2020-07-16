@@ -5,6 +5,7 @@ import com.stehno.ersatz.ErsatzServer
 import grails.testing.mixin.integration.Integration
 import io.sentry.Sentry
 import io.sentry.SentryClient
+import io.sentry.SentryClientFactory
 import io.sentry.servlet.SentryServletRequestListener
 import org.slf4j.LoggerFactory
 import spock.lang.Specification
@@ -14,16 +15,18 @@ import spock.util.mop.ConfineMetaClassChanges
 class SanityIntegrationSpec extends Specification {
 
     GrailsLogbackSentryAppender sentryAppender
-    GrailsSentryClientFactory grailsSentryClientFactory
     SentryClient sentryClient
+    SentryClientFactory sentryClientFactory
+    SentryClientFactoryProvider sentryClientFactoryProvider
     SentryServletRequestListener sentryServletRequestListener
 
     @ConfineMetaClassChanges(GrailsLogbackSentryAppender)
     def "everything works"() {
         expect: "if everything is ok sentry then beans are injected"
-            grailsSentryClientFactory
             sentryAppender
             sentryClient
+            sentryClientFactory
+            sentryClientFactoryProvider
             sentryServletRequestListener
         when: "mock http server is started"
             ErsatzServer server = new ErsatzServer().expectations {
