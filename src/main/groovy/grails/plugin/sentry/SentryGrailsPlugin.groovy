@@ -62,8 +62,8 @@ class SentryGrailsPlugin extends Plugin {
                 log.info 'Sentry config found, creating Sentry client and corresponding Logback appender'
                 sentryClientFactoryProvider(SentryClientFactoryProvider)
                 Dsn realDsn = new Dsn(pluginConfig.dsn.toString())
-                sentryClientFactory(sentryClientFactoryProvider: 'createFactory', realDsn)
-                sentryClient(sentryClientFactory: 'createSentryClient', realDsn) { bean ->
+                sentryFactory(sentryClientFactoryProvider: 'createFactory', realDsn)
+                sentryClient(sentryFactory: 'createSentryClient', realDsn) { bean ->
                     bean.autowire = 'byName'
                 }
                 sentryAppender(GrailsLogbackSentryAppender, pluginConfig, grailsApplication.metadata['info.app.version'])

@@ -16,7 +16,7 @@ class SanityIntegrationSpec extends Specification {
 
     GrailsLogbackSentryAppender sentryAppender
     SentryClient sentryClient
-    SentryClientFactory sentryClientFactory
+    SentryClientFactory sentryFactory
     SentryClientFactoryProvider sentryClientFactoryProvider
     SentryServletRequestListener sentryServletRequestListener
 
@@ -25,7 +25,7 @@ class SanityIntegrationSpec extends Specification {
         expect: "if everything is ok sentry then beans are injected"
             sentryAppender
             sentryClient
-            sentryClientFactory
+            sentryFactory
             sentryClientFactoryProvider
             sentryServletRequestListener
         when: "mock http server is started"
